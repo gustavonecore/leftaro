@@ -1,0 +1,5 @@
+/vendor
+/tests/coverage
+/humbug.json
+/phpunit.xml
+/humbuglog.txt
