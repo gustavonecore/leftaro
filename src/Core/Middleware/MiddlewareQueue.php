@@ -10,7 +10,7 @@ use UnexpectedValueException;
 /**
  * Class to handle the middlewares execution as a FIFO queue
  */
-class MiddlewareList
+class MiddlewareQueue
 {
 	/**
 	 * @var  \SplQueue  Queue to store the middlewares
@@ -34,7 +34,7 @@ class MiddlewareList
 	public function add(MiddlewareInterface $middleware)
 	{
 		$next = $this->queue->count() === 0 ?
-			function(ServerRequestInterface $request, ResponseInterface $response) { return $response; } :
+			function(RequestInterface $request, ResponseInterface $response) { return $response; } :
 			$this->queue->dequeue();
 
 		$this->queue->enqueue(function(RequestInterface $request, ResponseInterface $response) use ($middleware, $next)

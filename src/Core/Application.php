@@ -1,5 +1,6 @@
 <?php namespace Leftaro\Core;
 
+use InvalidArgumentException;
 use FastRoute\RouteCollector;
 use Leftaro\Core\Middleware\MiddlewareInterface;
 use Leftaro\Core\Middleware\MiddlewareQueue;
@@ -7,6 +8,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Zend\Diactoros\Response;
+use ReflectionClass;
 
 class Application implements MiddlewareInterface
 {
@@ -23,32 +25,66 @@ class Application implements MiddlewareInterface
 	{
 		$this->container = $container;
 		$this->middlewareQueue = new MiddlewareQueue;
+
+		$this->setupMiddlewares();
 	}
 
 	public function processRequest(RequestInterface $request, ResponseInterface $response) : ResponseInterface
 	{
-		if ($this->routeType === self::ROUTE_TYPE_AUTO)
-		{
-			return $this->executeRoute($request);
-		}
-		else
-		{
-			$dispatcher = FastRoute\simpleDispatcher(function(RouteCollector $r)
-			{
-				/*
-				$r->addRoute('GET', '/users', 'get_all_users_handler');
-				// {id} must be a number (\d+)
-				$r->addRoute('GET', '/user/{id:\d+}', 'get_user_handler');
-				// The /{title} suffix is optional
-				$r->addRoute('GET', '/articles/{id:\d+}[/{title}]', 'get_article_handler');
-				*/
-			});
-		}
+		return $response;
 	}
 
 	public function setType(string $type)
 	{
 		$this->routeType = $type;
+	}
+
+	public function run(RequestInterface $request) : ResponseInterface
+	{
+		$response = $this->runMiddlewares($request);
+	}
+
+	public function executeRoute(RequestInterface $request) : ResponseInterface
+	{
+		// Detect automatic routes and load the controller class on the fly here
+	}
+
+	/**
+	 * Configure the existing middlewares
+	 */
+	private function setupMiddlewares()
+	{
+		$this->addMiddlewares($this->container->get('config')->get('middlewares.before'));
+		$this->middlewareQueue->add($this);
+		$this->addMiddlewares($this->container->get('config')->get('middlewares.after'));
+	}
+
+	private function addMiddlewares(array $middlewareNames)
+	{
+		foreach ($middlewareNames as $middlewareClassName)
+		{
+			$reflector = new ReflectionClass($middlewareClassName);
+
+			$middlewareInstance = $reflector->newInstanceArgs();
+
+			if ($middlewareInstance instanceof MiddlewareInterface === false)
+			{
+				throw new InvalidArgumentException('Invalid middleware ' . $middleware);
+			}
+
+			$this->middlewareQueue->add($middlewareInstance);
+		}
+	}
+
+	/**
+	 * Run the middleware stack with the received request
+	 * @param  ServerRequestInterface $request   Request
+	 *
+	 * @return ResponseInterface Response object
+	 */
+	private function runMiddlewares(RequestInterface $request) : ResponseInterface
+	{
+		return $this->middlewareQueue->process($request, new Response);
 	}
 
 	/**
@@ -60,26 +96,8 @@ class Application implements MiddlewareInterface
 	 *
 	 * @return ResponseInterface                 Response object
 	 */
-	public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next) : ResponseInterface
+	public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
 	{
 		return $next($request, $this->processRequest($request, $response));
-	}
-
-	public function run(RequestInterface $request) : ResponseInterface
-	{
-		$this->routeType = !$this->routeType ? self::ROUTE_TYPE_AUTO : $this->routeType;
-
-		$this->middlewareQueue->add(/*TODO Get before middlewares from somewhere*/);
-
-		$this->middlewareQueue->add($this);
-
-		$this->middlewareQueue->add(/*TODO Get after middlewares from somewhere*/);
-
-		return $this->middlewareQueue->process($request, new Response);
-	}
-
-	public function executeRoute(RequestInterface $request) : ResponseInterface
-	{
-		// Detect automatic routes and load the controller class on the fly here
 	}
 }

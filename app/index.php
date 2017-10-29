@@ -4,7 +4,7 @@ require __DIR__ . '/bootstrap.php';
 
 $container = require __DIR__ . '/../config/local/container.php';
 
-$application = new \Leftaro\Application($container);
+$application = new \Leftaro\Core\Application($container);
 
 /* TODO
 $application->add(function($request, $response, $next) {

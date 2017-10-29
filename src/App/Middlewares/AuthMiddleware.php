@@ -1,6 +1,6 @@
-<?php namespace Leftaro\App;
+<?php namespace Leftaro\App\Middlewares;
 
-use Leftaro\Core\MiddlewareInterface;
+use Leftaro\Core\Middleware\MiddlewareInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -17,5 +17,19 @@ class AuthMiddleware implements MiddlewareInterface
 	 */
 	public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
 	{
+		$accessToken = null;
+
+		if (isset($request->getQueryParams()['access_token']) === true)
+		{
+			$accessToken = $request->getQueryParams()['access_token'];
+		}
+		else if ($request->hasHeader('x-access-token') === true)
+		{
+			$accessToken = $request->getHeader('x-access-token')[0];
+		}
+
+		$request = $request->withAttribute('access_token', $accessToken);
+
+		return $next($request, $response);
 	}
 }

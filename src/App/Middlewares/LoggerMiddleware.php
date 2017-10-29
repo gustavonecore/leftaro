@@ -1,6 +1,6 @@
-<?php namespace Leftaro\App;
+<?php namespace Leftaro\App\Middlewares;
 
-use Leftaro\Core\MiddlewareInterface;
+use Leftaro\Core\Middleware\MiddlewareInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -17,5 +17,11 @@ class LoggerMiddleware implements MiddlewareInterface
 	 */
 	public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
 	{
+		error_log("Request " . $request->getMethod() . " " . (string)$request->getUri() . " in: " . (string)$request->getBody());
+		error_log("Response " . (string)$response->getBody());
+
+		$response->getBody()->rewind();
+
+		return $next($request, $response);
 	}
 }
