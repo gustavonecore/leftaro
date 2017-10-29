@@ -19,16 +19,16 @@ class AuthMiddleware implements MiddlewareInterface
 	{
 		$accessToken = null;
 
-		if (isset($request->getQueryParams()['access_token']) === true)
+		if (isset($request->getQueryParams()['secure_token']) === true)
 		{
-			$accessToken = $request->getQueryParams()['access_token'];
+			$accessToken = $request->getQueryParams()['secure_token'];
 		}
-		else if ($request->hasHeader('x-access-token') === true)
+		else if ($request->hasHeader('x-secure-token') === true)
 		{
-			$accessToken = $request->getHeader('x-access-token')[0];
+			$accessToken = $request->getHeader('x-secure-token')[0];
 		}
 
-		$request = $request->withAttribute('access_token', $accessToken);
+		$request = $request->withAttribute('secure_token', $accessToken);
 
 		return $next($request, $response);
 	}

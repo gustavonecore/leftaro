@@ -41,7 +41,7 @@ class Application implements MiddlewareInterface
 
 	public function run(RequestInterface $request) : ResponseInterface
 	{
-		$response = $this->runMiddlewares($request);
+		return $this->runMiddlewares($request);
 	}
 
 	public function executeRoute(RequestInterface $request) : ResponseInterface
@@ -63,14 +63,7 @@ class Application implements MiddlewareInterface
 	{
 		foreach ($middlewareNames as $middlewareClassName)
 		{
-			$reflector = new ReflectionClass($middlewareClassName);
-
-			$middlewareInstance = $reflector->newInstanceArgs();
-
-			if ($middlewareInstance instanceof MiddlewareInterface === false)
-			{
-				throw new InvalidArgumentException('Invalid middleware ' . $middleware);
-			}
+			$middlewareInstance = $this->container->make($middlewareClassName);
 
 			$this->middlewareQueue->add($middlewareInstance);
 		}

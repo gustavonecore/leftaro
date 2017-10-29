@@ -6,6 +6,9 @@ return [
 		'pass' => '',
 		'name' => '',
 	],
+	'paths' => [
+		'logfile' => __DIR__ . '/../../log/leftaro.log',
+	],
 	'middlewares' => [
 		'before' => [
 			\Leftaro\App\Middlewares\AuthMiddleware::class,

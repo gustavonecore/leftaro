@@ -3,9 +3,24 @@
 use Leftaro\Core\Middleware\MiddlewareInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 
 class LoggerMiddleware implements MiddlewareInterface
 {
+	/**
+	 * @var  \Psr\Log\LoggerInterface  $logger  Logger instance
+	 */
+	protected $logger;
+
+	/**
+	 * Constructs the middleware
+	 * @param  \Psr\Log\LoggerInterface  $logger  Logger instance
+	 */
+	public function __construct(LoggerInterface $logger)
+	{
+		$this->logger = $logger;
+	}
+
 	/**
 	 * Handle the middleware call for request and response approach
 	 *
@@ -17,8 +32,8 @@ class LoggerMiddleware implements MiddlewareInterface
 	 */
 	public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
 	{
-		error_log("Request " . $request->getMethod() . " " . (string)$request->getUri() . " in: " . (string)$request->getBody());
-		error_log("Response " . (string)$response->getBody());
+		$this->logger->info("Request " . $request->getMethod() . " " . (string)$request->getUri() . " in: " . (string)$request->getBody());
+		$this->logger->info("Response " . (string)$response->getBody());
 
 		$response->getBody()->rewind();
 
