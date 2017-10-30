@@ -31,6 +31,8 @@ class Application implements MiddlewareInterface
 
 	public function processRequest(RequestInterface $request, ResponseInterface $response) : ResponseInterface
 	{
+		$response->getBody()->write('I\'m the application..');
+
 		return $response;
 	}
 
@@ -39,9 +41,31 @@ class Application implements MiddlewareInterface
 		$this->routeType = $type;
 	}
 
-	public function run(RequestInterface $request) : ResponseInterface
+	public function run(RequestInterface $request)
 	{
-		return $this->runMiddlewares($request);
+		$response = $this->runMiddlewares($request);
+
+		$this->renderResponse($response);
+	}
+
+	/**
+	 * Renders an HTTP response.
+	 *
+	 * @param \Psr\Http\Message\ResponseInterface $response Response to be rendered.
+	 */
+	protected function renderResponse(ResponseInterface $response)
+	{
+		http_response_code($response->getStatusCode());
+
+		foreach ($response->getHeaders() as $key => $values)
+		{
+			foreach ($values as $i => $value)
+			{
+				header("$key: $value", $i === 0);
+			}
+		}
+
+		echo (string)$response->getBody();
 	}
 
 	public function executeRoute(RequestInterface $request) : ResponseInterface
@@ -54,9 +78,9 @@ class Application implements MiddlewareInterface
 	 */
 	private function setupMiddlewares()
 	{
-		$this->addMiddlewares($this->container->get('config')->get('middlewares.before'));
-		$this->middlewareQueue->add($this);
 		$this->addMiddlewares($this->container->get('config')->get('middlewares.after'));
+		$this->middlewareQueue->add($this);
+		$this->addMiddlewares($this->container->get('config')->get('middlewares.before'));
 	}
 
 	private function addMiddlewares(array $middlewareNames)
@@ -91,6 +115,8 @@ class Application implements MiddlewareInterface
 	 */
 	public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
 	{
-		return $next($request, $this->processRequest($request, $response));
+		$response = $this->processRequest($request, $response);
+
+		return $next($request, $response);
 	}
 }

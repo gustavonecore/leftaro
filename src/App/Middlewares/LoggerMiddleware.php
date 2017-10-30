@@ -35,8 +35,6 @@ class LoggerMiddleware implements MiddlewareInterface
 		$this->logger->info("Request " . $request->getMethod() . " " . (string)$request->getUri() . " in: " . (string)$request->getBody());
 		$this->logger->info("Response " . (string)$response->getBody());
 
-		$response->getBody()->rewind();
-
 		return $next($request, $response);
 	}
 }

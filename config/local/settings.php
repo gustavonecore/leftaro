@@ -1,6 +1,6 @@
 <?php
 return [
-	'host' => 'http://0.0.0.0:8000/leftaro/',
+	'host' => 'http://0.0.0.0:8000/',
 	'database' => [
 		'user' => '',
 		'pass' => '',

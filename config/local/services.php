@@ -16,7 +16,7 @@ return [
 	Logger::class => function (ContainerInterface $container)
 	{
 		$log = new Logger('leftaro');
-		$log->pushHandler(new StreamHandler($container->get('config')->get('paths.logfile'), Logger::DEBUG));
+		$log->pushHandler(new \Monolog\Handler\ErrorLogHandler());
 		return $log;
 	},
 
