@@ -12,14 +12,14 @@ use ReflectionClass;
 
 class Application implements MiddlewareInterface
 {
-	const ROUTE_TYPE_AUTO = 'reverse';
-	const ROUTE_TYPE_FIXED = 'fixed';
+	const ROUTING_AUTO = 'auto';
+	const ROUTING_FIXED = 'fixed';
 
 	protected $container;
 
 	protected $middlewareQueue;
 
-	protected $routeType;
+	protected $routingPolicy;
 
 	public function __construct(ContainerInterface $container)
 	{
@@ -36,11 +36,14 @@ class Application implements MiddlewareInterface
 		return $response;
 	}
 
-	public function setType(string $type)
+	public function setRoutingPoligy(string $type)
 	{
-		$this->routeType = $type;
+		$this->routingPolicy = $type;
 	}
 
+	/**
+	 * Entry point of the application for processing requests
+	 */
 	public function run(RequestInterface $request)
 	{
 		$response = $this->runMiddlewares($request);

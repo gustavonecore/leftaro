@@ -12,6 +12,13 @@ $application->add(function($request, $response, $next) {
 });
 */
 
+/**
+ * If you want to auto-load the controller/methods by URI convention, use:
+ * Application::ROUTING_AUTO
+ * ROUTING_FIXED: Used to load a defined class/method from an URI string
+ */
+$application->setRoutingPoligy(\Leftaro\Core\Application::ROUTING_FIXED);
+
 $application->run(\Zend\Diactoros\ServerRequestFactory::fromGlobals(
     $_SERVER,
     $_GET,
