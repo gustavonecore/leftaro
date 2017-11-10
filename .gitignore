@@ -5,3 +5,5 @@
 /humbuglog.txt
 /config/local/*
 /config/local
+/log/leftaro.log
+/resource/cache/*

@@ -1,7 +1,6 @@
 <?php namespace Leftaro\App\Controller;
 
 use Leftaro\Core\Controller\AbstractController;
-use UnexpectedValueException;
 use Zend\Diactoros\{Response, ServerRequest};
 
 /**
@@ -9,12 +8,42 @@ use Zend\Diactoros\{Response, ServerRequest};
  */
 class WelcomeController extends AbstractController
 {
-	public function __construct()
+	/**
+	 * Handle index endpoint
+	 *
+	 * @param ServerRequest $request
+	 * @return Response
+	 */
+	public function textAction(ServerRequest $request) : Response
 	{
+		return $this->text("Welcome to Leftaro Microframework!");
 	}
 
-	public function indexAction(ServerRequest $request) : Response
+	/**
+	 * Handle json response
+	 *
+	 * @param ServerRequest $request
+	 * @return Response
+	 */
+	public function jsonAction(ServerRequest $request) : Response
 	{
-		return new Response("Welcome to Leftaro Microframework! wmnd wmd wmd wmnd nwmd wmn dmwn dmwn dmwne dmw", 200);
+		return $this->json([
+			'status' => true,
+			'message' => 'Example json response',
+		]);
+	}
+
+	/**
+	 * Handle an html view request
+	 *
+	 * @param ServerRequest $request
+	 * @return Response
+	 */
+	public function htmlAction(ServerRequest $request) : Response
+	{
+		return $this->twig('welcome.twig', [
+			'title' => 'Welcome to Leftaro Microframework',
+			'description' => 'This is a simple framework in construction',
+		]);
 	}
 }

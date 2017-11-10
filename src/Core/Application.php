@@ -13,6 +13,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\JsonResponse;
+use Zend\Diactoros\Response\TextResponse;
 use ReflectionClass;
 
 class Application
@@ -20,15 +21,30 @@ class Application
 	const ROUTING_AUTO = 'auto';
 	const ROUTING_FIXED = 'fixed';
 
+	/**
+	 * @var \Psr\Container\ContainerInterface  Container
+	 */
 	protected $container;
 
+	/**
+	 * @var \Leftaro\Core\Middleware\MiddlewareQueue  MiddlewareQueue
+	 */
 	protected $middlewareQueue;
 
+	/**
+	 * @var string Routing policy
+	 */
 	protected $routingPolicy;
 
+	/**
+	 * Constructs the main application
+	 *
+	 * @param \Psr\Container\ContainerInterface $container
+	 */
 	public function __construct(ContainerInterface $container)
 	{
 		$this->container = $container;
+
 		$this->middlewareQueue = new MiddlewareQueue;
 
 		$this->setupMiddlewares();
@@ -40,7 +56,10 @@ class Application
 	}
 
 	/**
-	 * Entry point of the application for processing requests
+	 * Run the full request processing
+	 *
+	 * @param \Psr\Http\Message\RequestInterface  $request  Request to be handled
+	 * @return void
 	 */
 	public function run(RequestInterface $request)
 	{
@@ -66,24 +85,26 @@ class Application
      * @return ResponseInterface
      * @throws Exception if a handler is needed and not found
      */
-    protected function handleException(Exception $e, ServerRequestInterface $request)
+    protected function handleException(Exception $e, RequestInterface $request) : ResponseInterface
     {
 		if ($e instanceof MethodNotAllowedException)
 		{
-            return new Response('Method not allowed', 405);
+            return new TextResponse('Method not allowed', 405);
 		}
 		elseif ($e instanceof NotFoundException)
 		{
-			return new Response('Resource not found', 404);
+			return new TextResponse('Resource not found', 404);
 		}
 		elseif ($e instanceof LeftaroException)
 		{
 			// TODO
-            return new Response($e->getMessage(), 501);
+            return new TextResponse($e->getMessage(), 501);
 		}
 		else
 		{
-            return new Response('Unhandled error', 500);
+			$this->container->get('logger')->error('Unhandled exception. Detail: {0}', [$e->getMessage()]);
+
+            return new TextResponse('Unhandled error', 500);
 		}
 
         throw $e;
@@ -96,6 +117,8 @@ class Application
 	 */
 	protected function renderResponse(ResponseInterface $response)
 	{
+		$body = $response->getBody();
+
 		if (!headers_sent())
 		{
             // Headers
@@ -119,47 +142,12 @@ class Application
 
 		http_response_code($response->getStatusCode());
 
-		$body = $response->getBody();
-
 		if ($body->isSeekable())
 		{
 			$body->rewind();
 		}
 
-		$contentLength  = $response->getHeaderLine('Content-Length');
-
-		if (!$contentLength)
-		{
-			$contentLength = $body->getSize();
-		}
-
-		if (isset($contentLength))
-		{
-			$amountToRead = $contentLength;
-
-			while ($amountToRead > 0 && !$body->eof())
-			{
-				$data = $body->read(min($chunkSize, $amountToRead));
-				echo $data;
-				$amountToRead -= strlen($data);
-				if (connection_status() != CONNECTION_NORMAL)
-				{
-					break;
-				}
-			}
-		}
-		else
-		{
-			while (!$body->eof())
-			{
-				echo $body->read($chunkSize);
-
-				if (connection_status() != CONNECTION_NORMAL)
-				{
-					break;
-				}
-			}
-		}
+		echo $body->getContents();
 	}
 
 	public function executeRoute(RequestInterface $request) : ResponseInterface
