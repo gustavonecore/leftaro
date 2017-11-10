@@ -12,9 +12,10 @@ return [
 	'middlewares' => [
 		'before' => [
 			\Leftaro\App\Middlewares\AuthMiddleware::class,
+			\Leftaro\App\Middlewares\RouteMiddleware::class,
 		],
 		'after' => [
 			\Leftaro\App\Middlewares\LoggerMiddleware::class,
 		],
-	]
+	],
 ];

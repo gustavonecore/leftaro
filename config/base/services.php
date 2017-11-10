@@ -1,7 +1,7 @@
 <?php
 
+use FastRoute\Dispatcher;
 use Interop\Container\ContainerInterface;
-use function DI\object;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Noodlehaus\Config;
@@ -23,5 +23,20 @@ return [
 	LoggerInterface::class => function (ContainerInterface $container)
 	{
 		return $container->get(Logger::class);
+	},
+
+	Dispatcher::class => function (ContainerInterface $container)
+	{
+		$dispatcher = \FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) use ($container)
+		{
+			$routes = require_once __DIR__ . '/routes.php';
+
+			foreach ($routes as $route)
+			{
+				list($method, $endpoint, $handlerClass, $handlerMethod) = $route;
+
+				$r->addRoute($method, $method, $handlerClass . '::' . $handlerMethod);
+			}
+		});
 	},
 ];

@@ -1,4 +1,4 @@
-<?php namespace Leftaro\App\Middlewares;
+<?php namespace Leftaro\App\Middleware;
 
 use Leftaro\Core\Middleware\MiddlewareInterface;
 use Psr\Http\Message\RequestInterface;
