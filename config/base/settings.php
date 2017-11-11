@@ -2,20 +2,24 @@
 return [
 	'host' => 'http://0.0.0.0:8000/',
 	'database' => [
+		'dbname' => '',
 		'user' => '',
-		'pass' => '',
-		'name' => '',
+		'password' => '',
+		'host' => 'localhost',
+		'driver' => 'pdo_mysql',
 	],
 	'paths' => [
 		'logfile' => __DIR__ . '/../../log/leftaro.log',
+		'views' => __DIR__ . '/../../resource/views/',
+		'views_cache' => __DIR__ . '/../../resource/cache/',
 	],
 	'middlewares' => [
 		'before' => [
-			\Leftaro\App\Middlewares\AuthMiddleware::class,
-			\Leftaro\App\Middlewares\RouteMiddleware::class,
+			\Leftaro\Core\Middleware\RouteMiddleware::class,
+			\Leftaro\App\Middleware\AuthMiddleware::class,
 		],
 		'after' => [
-			\Leftaro\App\Middlewares\LoggerMiddleware::class,
+			\Leftaro\App\Middleware\LoggerMiddleware::class,
 		],
 	],
 ];

@@ -1,5 +1,8 @@
 <?php
 
+use DI\Container;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Configuration;
 use FastRoute\Dispatcher;
 use Interop\Container\ContainerInterface;
 use Monolog\Logger;
@@ -11,6 +14,11 @@ return [
 	'config' => function ()
 	{
         return new Config(__DIR__ . '/settings.php');
+	},
+
+	Config::class => function (ContainerInterface $container)
+	{
+		return $container->get('config');
 	},
 
 	Logger::class => function (ContainerInterface $container)
@@ -25,18 +33,41 @@ return [
 		return $container->get(Logger::class);
 	},
 
+	'logger' => function (ContainerInterface $container)
+	{
+		return $container->get(Logger::class);
+	},
+
 	Dispatcher::class => function (ContainerInterface $container)
 	{
-		$dispatcher = \FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) use ($container)
+		return FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) use ($container)
 		{
-			$routes = require_once __DIR__ . '/routes.php';
-
-			foreach ($routes as $route)
+			foreach (require_once __DIR__ . '/routes.php' as $route)
 			{
 				list($method, $endpoint, $handlerClass, $handlerMethod) = $route;
 
-				$r->addRoute($method, $method, $handlerClass . '::' . $handlerMethod);
+				$r->addRoute(strtoupper($method), $endpoint, $handlerClass . '::' . $handlerMethod);
 			}
 		});
+	},
+
+	'twig' => function (ContainerInterface $container)
+	{
+		$loader = new Twig_Loader_Filesystem($container->get('config')->get('paths.views'));
+
+		return new Twig_Environment($loader,
+		[
+			'cache' => $container->get('config')->get('paths.views_cache'),
+		]);
+	},
+
+	Container::class => function(ContainerInterface $container)
+	{
+		return $container;
+	},
+
+	'database' => function(ContainerInterface $container)
+	{
+		return DriverManager::getConnection($container->get('config')->get('database'), new Configuration());
 	},
 ];
