@@ -15,6 +15,7 @@ return [
 	],
 	'middlewares' => [
 		'before' => [
+			// Use SmartRouteMiddleware instead of RouteMiddleware if you want to auto-discover the endpoints
 			\Leftaro\Core\Middleware\RouteMiddleware::class,
 			\Leftaro\App\Middleware\AuthMiddleware::class,
 		],

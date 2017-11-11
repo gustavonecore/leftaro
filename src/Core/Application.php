@@ -93,7 +93,7 @@ class Application
 		}
 		elseif ($e instanceof NotFoundException)
 		{
-			return new TextResponse('Resource not found', 404);
+			return new TextResponse('Resource not found for ' . $e->getRequest()->getUri()->getPAth(), 404);
 		}
 		elseif ($e instanceof LeftaroException)
 		{
@@ -148,11 +148,6 @@ class Application
 		}
 
 		echo $body->getContents();
-	}
-
-	public function executeRoute(RequestInterface $request) : ResponseInterface
-	{
-		// Detect automatic routes and load the controller class on the fly here
 	}
 
 	/**
