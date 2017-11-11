@@ -11,8 +11,8 @@ Current status
 - [x] Add PSR-11 Container
 - [x] Add configuration loader class
 - [x] Add built-in server for development mode
-- [ ] Add FastRoute for fixed routes by file
-- [ ] Add automatic route resolver by URI/Controller
+- [x] Add FastRoute for fixed routes by file
+- [x] Add automatic route resolver by URI/Controller
 - [ ] Add utility commands to
   - [ ] Migrate database
   - [ ] Create an empty project
