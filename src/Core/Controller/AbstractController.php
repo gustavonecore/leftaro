@@ -26,6 +26,30 @@ class AbstractController
 	}
 
 	/**
+	 * First function that is executed by the controller
+	 *
+	 * @param ServerRequest $request
+	 * @param Response $response
+	 * @return Response
+	 */
+	public function before(ServerRequest $request, Response $response) : Response
+	{
+		return $response;
+	}
+
+	/**
+	 * Last function that is executed by the controller
+	 *
+	 * @param ServerRequest $request
+	 * @param Response $response
+	 * @return Response
+	 */
+	public function after(ServerRequest $request, Response $response) : Response
+	{
+		return $response;
+	}
+
+	/**
 	 * Create a Json response
 	 *
 	 * @param array $data    Data to be processed

@@ -14,7 +14,7 @@ class WelcomeController extends AbstractController
 	 * @param ServerRequest $request
 	 * @return Response
 	 */
-	public function textAction(ServerRequest $request) : Response
+	public function textAction(ServerRequest $request, Response $response) : Response
 	{
 		return $this->text("Welcome to Leftaro Microframework!");
 	}
@@ -25,7 +25,7 @@ class WelcomeController extends AbstractController
 	 * @param ServerRequest $request
 	 * @return Response
 	 */
-	public function jsonAction(ServerRequest $request) : Response
+	public function jsonAction(ServerRequest $request, Response $response) : Response
 	{
 		return $this->json([
 			'status' => true,
@@ -39,11 +39,25 @@ class WelcomeController extends AbstractController
 	 * @param ServerRequest $request
 	 * @return Response
 	 */
-	public function htmlAction(ServerRequest $request) : Response
+	public function htmlAction(ServerRequest $request, Response $response) : Response
 	{
 		return $this->twig('welcome.twig', [
 			'title' => 'Welcome to Leftaro Microframework',
 			'description' => 'This is a simple framework in construction',
+		]);
+	}
+
+	/**
+	 * Handle an html view request
+	 *
+	 * @param ServerRequest $request
+	 * @return Response
+	 */
+	public function htmlResourceAction(ServerRequest $request, Response $response) : Response
+	{
+		return $this->twig('welcome.twig', [
+			'title' => 'Welcome to Leftaro Microframework',
+			'description' => 'This is a simple framework in construction. Parameter id: ' . $request->getAttribute('id'),
 		]);
 	}
 }

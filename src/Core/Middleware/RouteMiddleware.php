@@ -56,12 +56,20 @@ class RouteMiddleware implements MiddlewareInterface
 
 				list($controller, $action) = explode('::', $routeInfo[1]);
 
-				$vars = $routeInfo[2];
+				// Add url parameters as request attributes
+				foreach ($routeInfo[2] as $key => $value)
+				{
+					$request = $request->withAttribute($key, $value);
+				}
 
 				$controllerInstance = $this->container->make($controller);
 
+				$response = $controllerInstance->before($request, $response);
+
 				// This execution method 'action' is ugly AF, use a better way. Check the container options
 				$response = $controllerInstance->$action($request, $response);
+
+				$response = $controllerInstance->after($request, $response);
 
 				break;
 		}
