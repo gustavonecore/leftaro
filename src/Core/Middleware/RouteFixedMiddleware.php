@@ -1,16 +1,15 @@
 <?php namespace Leftaro\Core\Middleware;
 
-use Exception;
-use Leftaro\Core\Controller\AbstractController;
+use FastRoute\Dispatcher;
 use Leftaro\Core\Middleware\MiddlewareInterface;
-use Leftaro\Core\Middleware\RouteFixedMiddleware;
-use Leftaro\Core\Middleware\RouteSmartMiddleware;
-use Leftaro\Core\Exception\LeftaroException;
+use Leftaro\Core\Exception\MethodNotAllowedException;
+use Leftaro\Core\Exception\NotFoundException;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Container\ContainerInterface;
+use Zend\Diactoros\Response;
 
-class RouteMiddleware implements MiddlewareInterface, RoutingInterface
+class RouteFixedMiddleware implements MiddlewareInterface, RoutingInterface
 {
 	/**
 	 * @var \Psr\Container\ContainerInterface  Container
@@ -38,7 +37,7 @@ class RouteMiddleware implements MiddlewareInterface, RoutingInterface
 	 */
 	public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
 	{
-		$response = self::getResponse($request, $response, $this->container);
+		$response = self::getResponse($request, $response);
 
 		return $next($request, $response);
 	}
@@ -54,13 +53,34 @@ class RouteMiddleware implements MiddlewareInterface, RoutingInterface
 	 */
 	public static function getResponse(RequestInterface $request, ResponseInterface $response, ContainerInterface $container) : ResponseInterface
 	{
-		try
+		$routeInfo = $container->get('dispatcher')->dispatch($request->getMethod(), $request->getUri()->getPath());
+
+		switch ($routeInfo[0])
 		{
-			$response = RouteFixedMiddleware::getResponse($request, $response, $container);
-		}
-		catch (LeftaroException $e)
-		{
-			$response = RouteSmartMiddleware::getResponse($request, $response, $container);
+			case Dispatcher::NOT_FOUND:
+				throw new NotFoundException($request);
+			case Dispatcher::METHOD_NOT_ALLOWED:
+				throw new MethodNotAllowedException($request);
+			case Dispatcher::FOUND:
+
+				list($controller, $action) = explode('::', $routeInfo[1]);
+
+				// Add url parameters as request attributes
+				foreach ($routeInfo[2] as $key => $value)
+				{
+					$request = $request->withAttribute($key, $value);
+				}
+
+				$controllerInstance = $container->make($controller);
+
+				$response = $controllerInstance->before($request, $response);
+
+				// This execution method 'action' is ugly AF, use a better way. Check the container options
+				$response = $controllerInstance->$action($request, $response);
+
+				$response = $controllerInstance->after($request, $response);
+
+			break;
 		}
 
 		return $response;

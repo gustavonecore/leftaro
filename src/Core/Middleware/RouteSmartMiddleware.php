@@ -1,13 +1,16 @@
 <?php namespace Leftaro\Core\Middleware;
 
 use Exception;
+use Leftaro\Core\Controller\AbstractController;
 use Leftaro\Core\Middleware\MiddlewareInterface;
 use Leftaro\Core\Exception\NotFoundException;
+use Leftaro\Core\Exception\MethodNotAllowedException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
+use RuntimeException;
 
-class SmartRouteMiddleware implements MiddlewareInterface
+class RouteSmartMiddleware implements MiddlewareInterface, RoutingInterface
 {
 	/**
 	 * @var \Psr\Container\ContainerInterface  Container
@@ -34,6 +37,22 @@ class SmartRouteMiddleware implements MiddlewareInterface
 	 * @return \Psr\Http\Message\ResponseInterface
 	 */
 	public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
+	{
+		$response = self::getResponse($request, $response, $this->container);
+
+		return $next($request, $response);
+	}
+
+	/**
+	 * Handle the middleware call for request and response approach
+	 *
+	 * @param  \Psr\Http\Message\RequestInterface    $request   Request instance
+	 * @param  \Psr\Http\Message\ResponseInterface   $response  Response instance
+	 * @param  \Psr\Container\ContainerInterface   $contsainer Container
+	 *
+	 * @return \Psr\Http\Message\ResponseInterface
+	 */
+	public static function getResponse(RequestInterface $request, ResponseInterface $response, ContainerInterface $container) : ResponseInterface
 	{
 		$prefix = '/';
 		$path = $request->getUri()->getPath();
@@ -86,19 +105,29 @@ class SmartRouteMiddleware implements MiddlewareInterface
 
 		try
 		{
-			$controllerInstance = $this->container->make($controller);
+			$controllerInstance = $container->make($controller);
+
+			if ($controllerInstance instanceof AbstractController === false)
+			{
+				throw new RuntimeException('Invalid controller signature');
+			}
+
+			if (!method_exists($controllerInstance, $action))
+			{
+				throw new RuntimeException('Invalid method');
+			}
+
+			$response = $controllerInstance->before($request, $response);
+
+			$response = $controllerInstance->$action($request, $response);
+
+			$response = $controllerInstance->after($request, $response);
 		}
 		catch (Exception $e)
 		{
 			throw new NotFoundException($request);
 		}
 
-		$response = $controllerInstance->before($request, $response);
-
-		$response = $controllerInstance->$action($request, $response);
-
-		$response = $controllerInstance->after($request, $response);
-
-		return $next($request, $response);
+		return $response;
 	}
 }
