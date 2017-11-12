@@ -70,4 +70,9 @@ return [
 	{
 		return DriverManager::getConnection($container->get('config')->get('database'), new Configuration());
 	},
+
+	'dispatcher' => function(ContainerInterface $container)
+	{
+		return $container->get(Dispatcher::class);
+	},
 ];

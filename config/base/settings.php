@@ -2,9 +2,9 @@
 return [
 	'host' => 'http://0.0.0.0:8000/',
 	'database' => [
-		'dbname' => '',
-		'user' => '',
-		'password' => '',
+		'dbname' => 'lab465_smartcash',
+		'user' => 'root',
+		'password' => 'root',
 		'host' => 'localhost',
 		'driver' => 'pdo_mysql',
 	],
@@ -15,7 +15,6 @@ return [
 	],
 	'middlewares' => [
 		'before' => [
-			// Use SmartRouteMiddleware instead of RouteMiddleware if you want to auto-discover the endpoints
 			\Leftaro\Core\Middleware\RouteMiddleware::class,
 			\Leftaro\App\Middleware\AuthMiddleware::class,
 		],
