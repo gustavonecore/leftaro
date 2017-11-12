@@ -1,10 +1,6 @@
 <?php namespace Leftaro\Core\Middleware;
 
-use Exception;
-use Leftaro\Core\Controller\AbstractController;
 use Leftaro\Core\Middleware\MiddlewareInterface;
-use Leftaro\Core\Middleware\RouteFixedMiddleware;
-use Leftaro\Core\Middleware\RouteSmartMiddleware;
 use Leftaro\Core\Exception\LeftaroException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
