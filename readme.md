@@ -6,10 +6,10 @@ PSR-7, PSR-11 and PSR-15 compliant micro framework for PHP 7.
 Get ready
 --------------
 
-- `composer install``
-- Copy the folder config/base into config/local
+- `composer install`
+- Copy the folder `config/base` into `config/local`
 - Update the settings
-- Run the local server for development with `php bin/server.php``
+- Run the local server for development with `php bin/server.php`
 - Try to run the example static routes defined in `config/local/routes.php`
   - http://0.0.0.0/html
   - http://0.0.0.0/html/10
