@@ -11,10 +11,10 @@ Get ready
 - Update the settings
 - Run the local server for development with `php bin/server.php`
 - Try to run the example static routes defined in `config/local/routes.php`
-  - http://0.0.0.0/html
-  - http://0.0.0.0/html/10
-  - http://0.0.0.0/text
-  - http://0.0.0.0/json
+  - http://0.0.0.0:8000/html
+  - http://0.0.0.0:8000/html/10
+  - http://0.0.0.0:8000/text
+  - http://0.0.0.0:8000/json
 - Try to run the smart-discover endpoints like:
   - http://0.0.0.0:8000/smart/10/discover/100/resource/my-resource-id
 
