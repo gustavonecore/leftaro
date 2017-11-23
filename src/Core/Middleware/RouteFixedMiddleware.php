@@ -53,7 +53,9 @@ class RouteFixedMiddleware implements MiddlewareInterface, RoutingInterface
 	 */
 	public static function getResponse(RequestInterface $request, ResponseInterface $response, ContainerInterface $container) : ResponseInterface
 	{
-		$routeInfo = $container->get('dispatcher')->dispatch($request->getMethod(), $request->getUri()->getPath());
+		$rootPath = (new Uri($container->get('config')->get('host')))->getPath();
+		$path = str_replace($rootPath, '', $request->getUri()->getPath());
+		$path = $path !== '' ? '/' . $path : $path;
 
 		switch ($routeInfo[0])
 		{
