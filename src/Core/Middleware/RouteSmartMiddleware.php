@@ -107,6 +107,8 @@ class RouteSmartMiddleware implements MiddlewareInterface, RoutingInterface
 		{
 			$controllerInstance = $container->make($controller);
 
+			$controllerInstance->setRequest($request);
+
 			if ($controllerInstance instanceof AbstractController === false)
 			{
 				throw new RuntimeException('Invalid controller signature');

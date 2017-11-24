@@ -2,6 +2,11 @@
 declare(strict_types = 1);
 require __DIR__ . '/bootstrap.php';
 
+if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"]))
+{
+	return false;
+}
+
 $container = require __DIR__ . '/../config/local/container.php';
 
 $application = new \Leftaro\Core\Application($container);

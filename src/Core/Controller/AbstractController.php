@@ -5,7 +5,8 @@ use Zend\Diactoros\{Response, ServerRequest};
 use Zend\Diactoros\Response\{
 	JsonResponse,
 	TextResponse,
-	HtmlResponse
+	HtmlResponse,
+	RedirectResponse
 };
 
 /**
@@ -13,7 +14,15 @@ use Zend\Diactoros\Response\{
  */
 class AbstractController
 {
+	/**
+	 * @var \DI\Container  Container
+	 */
 	protected $container;
+
+	/**
+	 * @var ServerRequest $request  Request
+	 */
+	protected $request;
 
 	/**
 	 * Constructs the base class
@@ -23,6 +32,17 @@ class AbstractController
 	public function __construct(Container $container)
 	{
 		$this->container = $container;
+	}
+
+	/**
+	 * Sets the request handler into the controller
+	 *
+	 * @param ServerRequest $request
+	 * @return void
+	 */
+	public function setRequest(ServerRequest $request)
+	{
+		$this->request = $request;
 	}
 
 	/**
@@ -95,5 +115,17 @@ class AbstractController
 	public function twig(string $template, array $data = []) : Response
 	{
 		return $this->html($this->container->get('twig')->render($template, $data));
+	}
+
+	/**
+	 * Create a redirect response
+	 *
+	 * @param string $template  Name of the template
+	 * @param array  $data      Data to merge into the view
+	 * @return Response
+	 */
+	public function redirect(string $uri, array $headers = []) : Response
+	{
+		return new RedirectResponse($uri, 302, $headers);
 	}
 }
