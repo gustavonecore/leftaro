@@ -101,34 +101,28 @@ class RouteSmartMiddleware implements MiddlewareInterface, RoutingInterface
 		}
 
 		$controller = 'Leftaro\\App\\Controller\\' . implode('\\', $controller) . 'Controller';
+
 		$action = strtolower($request->getMethod()) . ucfirst($action) . 'Action';
 
-		try
+		$controllerInstance = $container->make($controller);
+
+		$controllerInstance->setRequest($request);
+
+		if ($controllerInstance instanceof AbstractController === false)
 		{
-			$controllerInstance = $container->make($controller);
-
-			$controllerInstance->setRequest($request);
-
-			if ($controllerInstance instanceof AbstractController === false)
-			{
-				throw new RuntimeException('Invalid controller signature');
-			}
-
-			if (!method_exists($controllerInstance, $action))
-			{
-				throw new RuntimeException('Invalid method');
-			}
-
-			$response = $controllerInstance->before($request, $response);
-
-			$response = $controllerInstance->$action($request, $response);
-
-			$response = $controllerInstance->after($request, $response);
+			throw new RuntimeException('Invalid controller signature');
 		}
-		catch (Exception $e)
+
+		if (!method_exists($controllerInstance, $action))
 		{
 			throw new NotFoundException($request);
 		}
+
+		$response = $controllerInstance->before($request, $response);
+
+		$response = $controllerInstance->$action($request, $response);
+
+		$response = $controllerInstance->after($request, $response);
 
 		return $response;
 	}

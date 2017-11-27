@@ -69,7 +69,7 @@ class Application
 		}
 		catch (Exception $e)
 		{
-			$response = $this->handleException($e, $e->getRequest());
+			$response = $this->handleException($e, $request);
 		}
 
 		$this->renderResponse($response);
