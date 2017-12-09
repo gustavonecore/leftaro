@@ -8,6 +8,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Zend\Diactoros\Response;
+use Zend\Diactoros\Uri;
 
 class RouteFixedMiddleware implements MiddlewareInterface, RoutingInterface
 {
@@ -62,6 +63,8 @@ class RouteFixedMiddleware implements MiddlewareInterface, RoutingInterface
 			$path = str_replace($rootPath, '', $request->getUri()->getPath());
 			$path = $path !== '' ? '/' . $path : $path;
 		}
+
+		$routeInfo = $container->get('dispatcher')->dispatch($request->getMethod(), $path);
 
 		switch ($routeInfo[0])
 		{
