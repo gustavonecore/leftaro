@@ -9,6 +9,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
+use Zend\Diactoros\Uri;
 
 class RouteSmartMiddleware implements MiddlewareInterface, RoutingInterface
 {
@@ -54,8 +55,16 @@ class RouteSmartMiddleware implements MiddlewareInterface, RoutingInterface
 	 */
 	public static function getResponse(RequestInterface $request, ResponseInterface $response, ContainerInterface $container) : ResponseInterface
 	{
+		$rootPath = (new Uri($container->get('config')->get('host')))->getPath();
+
 		$prefix = '/';
 		$path = $request->getUri()->getPath();
+
+		if ($rootPath !== '/')
+		{
+			$path = str_replace($rootPath, '', $path);
+			$path = $path !== '' ? '/' . $path : $path;
+		}
 
 		if (substr($path, 0, strlen($prefix)) !== $prefix)
 		{
